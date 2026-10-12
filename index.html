@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Deal Quiz - Seni Rupa Kelas XI</title>
+    <title>Super Deal Quiz v3.0 - Seni Rupa Kelas XI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -28,21 +28,43 @@
         .option-btn {
             transition: all 0.3s ease;
             transform: translateY(0);
+            border: 3px solid transparent;
         }
         
         .option-btn:hover:not(:disabled) {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
+        /* State: Dipilih (belum dicek) */
+        .option-btn.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+            transform: scale(1.02);
+        }
+        
+        /* State: Benar */
         .option-btn.correct {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+            border-color: #059669;
+            color: white !important;
             animation: pulse 0.5s;
         }
         
+        /* State: Salah */
         .option-btn.wrong {
             background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%) !important;
+            border-color: #dc2626;
+            color: white !important;
             animation: shake 0.5s;
+        }
+        
+        /* State: Ditampilkan sebagai kunci (saat lihat kunci) */
+        .option-btn.key-answer {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+            border-color: #d97706;
+            color: white !important;
+            animation: pulse 0.5s;
         }
         
         @keyframes pulse {
@@ -60,11 +82,11 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: conic-gradient(#ff6b6b 0deg, #4ecdc4 360deg);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            transition: all 0.3s;
         }
         
         .timer-inner {
@@ -78,6 +100,7 @@
             font-size: 2rem;
             font-weight: 900;
             color: #333;
+            z-index: 2;
         }
         
         .score-display {
@@ -94,9 +117,8 @@
             position: fixed;
             width: 10px;
             height: 10px;
-            background: #f00;
             animation: confetti-fall 3s linear;
-            z-index: 999;
+            z-index: 9999;
         }
         
         @keyframes confetti-fall {
@@ -104,35 +126,36 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         
-        .podium-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); }
-        .podium-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); }
-        .podium-3 { background: linear-gradient(135deg, #cd7f32, #e8a87c); }
-        
-        .leaderboard-item {
-            transition: all 0.3s ease;
-        }
-        
-        .leaderboard-item:hover {
-            transform: translateX(10px);
-            background: rgba(255,255,255,0.3);
-        }
-        
         .explanation-box {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            border-left: 5px solid #667eea;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: slideDown 0.5s ease;
         }
         
-        .group-selector {
-            transition: all 0.3s ease;
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .group-selector:hover {
-            transform: scale(1.05);
+        .action-btn {
+            transition: all 0.3s;
         }
         
-        .group-selector.selected {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
-            box-shadow: 0 0 20px rgba(56, 239, 125, 0.5);
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .attempt-badge {
+            background: rgba(255,255,255,0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -140,23 +163,27 @@
     <!-- Header -->
     <div class="max-w-6xl mx-auto mb-6">
         <div class="glass-effect rounded-2xl p-6 text-white">
-            <h1 class="text-4xl font-black text-center mb-2">🎯 SUPER DEAL QUIZ</h1>
+            <h1 class="text-4xl font-black text-center mb-2"> SUPER DEAL QUIZ v3.0</h1>
             <p class="text-center text-lg">Seni Rupa Kelas XI - MA Darussalam</p>
+            <p class="text-center text-sm opacity-75">Pilih jawaban → Cek → Bisa coba lagi jika salah!</p>
         </div>
     </div>
 
-    <!-- Navigation Buttons -->
-    <div class="max-w-6xl mx-auto mb-6 flex gap-4 flex-wrap justify-center">
-        <button onclick="showScreen('menu')" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
+    <!-- Navigation -->
+    <div class="max-w-6xl mx-auto mb-6 flex gap-3 flex-wrap justify-center">
+        <button onclick="showScreen('menu')" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg transition">
             🏠 Menu
         </button>
-        <button onclick="showScreen('group-select')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
-             Mulai Kuis
+        <button onclick="showScreen('quiz')" class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg transition">
+            🎮 Kuis
         </button>
-        <button onclick="showScreen('leaderboard')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
+        <button onclick="showScreen('groups')" class="bg-purple-500 hover:bg-purple-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg transition">
+            👥 Kelompok
+        </button>
+        <button onclick="showScreen('leaderboard')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg transition">
             🏆 Leaderboard
         </button>
-        <button onclick="showScreen('manage')" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition">
+        <button onclick="showScreen('manage')" class="bg-pink-500 hover:bg-pink-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg transition">
             ⚙️ Kelola Soal
         </button>
     </div>
@@ -167,83 +194,36 @@
             <h2 class="text-3xl font-bold mb-6 text-center">📚 Pilih Mode Bermain</h2>
             
             <div class="grid md:grid-cols-2 gap-6">
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="selectMode('all')">
-                    <h3 class="text-2xl font-bold mb-2">🎯 Semua Soal</h3>
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="startQuiz('all')">
+                    <h3 class="text-2xl font-bold mb-2"> Semua Soal</h3>
                     <p class="text-sm">Jawab semua soal yang tersedia</p>
                     <p class="text-xs mt-2 opacity-75">Total: <span id="total-soal">0</span> soal</p>
                 </div>
                 
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="selectMode('random')">
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="startQuiz('random')">
                     <h3 class="text-2xl font-bold mb-2">🎲 Acak 10 Soal</h3>
                     <p class="text-sm">Tantangan cepat dengan soal acak</p>
                 </div>
                 
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="selectMode('bab1')">
-                    <h3 class="text-2xl font-bold mb-2"> Bab 1</h3>
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="startQuiz('bab1')">
+                    <h3 class="text-2xl font-bold mb-2">📖 Bab 1</h3>
                     <p class="text-sm">Karya Berdampak & Design Thinking</p>
                 </div>
                 
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="selectMode('bab2')">
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="startQuiz('bab2')">
                     <h3 class="text-2xl font-bold mb-2">🎨 Bab 2</h3>
                     <p class="text-sm">Apresiasi Seni Rupa</p>
                 </div>
                 
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="selectMode('bab3')">
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="startQuiz('bab3')">
                     <h3 class="text-2xl font-bold mb-2">✍️ Bab 3</h3>
                     <p class="text-sm">Membuat Karya Seni Rupa</p>
                 </div>
                 
-                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="showScreen('manage')">
-                    <h3 class="text-2xl font-bold mb-2">⚙️ Pengaturan</h3>
-                    <p class="text-sm">Tambah/Edit soal & atur timer</p>
+                <div class="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-105 transition" onclick="showScreen('groups')">
+                    <h3 class="text-2xl font-bold mb-2"> Kelompok</h3>
+                    <p class="text-sm">Kelola & beri nilai kelompok</p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- GROUP SELECT SCREEN -->
-    <div id="group-select-screen" class="max-w-4xl mx-auto hidden">
-        <div class="quiz-card rounded-3xl p-8 text-white">
-            <h2 class="text-3xl font-bold mb-6 text-center">👥 Pilih Kelompok</h2>
-            <p class="text-center mb-8">Setiap kelompok akan berkompetisi di leaderboard!</p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(1)">
-                    <div class="text-4xl mb-2">🦁</div>
-                    <div class="font-bold text-xl">Kelompok 1</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="1">0</span></div>
-                </button>
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(2)">
-                    <div class="text-4xl mb-2">🐯</div>
-                    <div class="font-bold text-xl">Kelompok 2</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="2">0</span></div>
-                </button>
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(3)">
-                    <div class="text-4xl mb-2"></div>
-                    <div class="font-bold text-xl">Kelompok 3</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="3">0</span></div>
-                </button>
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(4)">
-                    <div class="text-4xl mb-2"></div>
-                    <div class="font-bold text-xl">Kelompok 4</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="4">0</span></div>
-                </button>
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(5)">
-                    <div class="text-4xl mb-2">🦊</div>
-                    <div class="font-bold text-xl">Kelompok 5</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="5">0</span></div>
-                </button>
-                <button class="group-selector glass-effect rounded-2xl p-6 text-center" onclick="selectGroup(6)">
-                    <div class="text-4xl mb-2">🐻</div>
-                    <div class="font-bold text-xl">Kelompok 6</div>
-                    <div class="text-sm opacity-75">Skor: <span class="group-score" data-group="6">0</span></div>
-                </button>
-            </div>
-            
-            <div class="text-center">
-                <button onclick="confirmGroup()" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold text-lg">
-                    ✅ Mulai dengan Kelompok Ini
-                </button>
             </div>
         </div>
     </div>
@@ -251,18 +231,12 @@
     <!-- QUIZ SCREEN -->
     <div id="quiz-screen" class="max-w-4xl mx-auto hidden">
         <div class="quiz-card rounded-3xl p-8 text-white relative overflow-hidden">
-            <!-- Group & Score Header -->
-            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <div class="bg-blue-500 rounded-full px-4 py-2 shadow-lg">
-                    <span class="font-bold"> <span id="current-group-name">Kelompok 1</span></span>
-                </div>
+            <!-- Header Info -->
+            <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
                 <div class="score-display rounded-full px-6 py-3 shadow-lg">
                     <span class="text-2xl font-bold">⭐ <span id="score">0</span></span>
                 </div>
-            </div>
-            
-            <!-- Timer & Question Counter -->
-            <div class="flex justify-between items-center mb-6">
+                
                 <div class="timer-circle" id="timer-circle">
                     <div class="timer-inner">
                         <span id="timer">10</span>
@@ -276,38 +250,74 @@
 
             <!-- Timer Control -->
             <div class="text-center mb-4">
-                <button onclick="toggleTimer()" id="timer-btn" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-lg font-bold">
-                    ▶️ Mulai Timer (10 detik)
+                <button onclick="toggleTimer()" id="timer-btn" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-lg font-bold text-sm shadow-lg action-btn">
+                    ▶️ Mulai Timer
                 </button>
+                <span id="attempt-display" class="attempt-badge ml-3 hidden">Percobaan ke-<span id="attempt-num">1</span></span>
             </div>
 
             <!-- Question -->
             <div class="glass-effect rounded-2xl p-6 mb-6">
-                <h3 id="question-text" class="text-2xl font-bold mb-4">Pertanyaan akan muncul di sini...</h3>
+                <h3 id="question-text" class="text-2xl font-bold mb-4">Pertanyaan...</h3>
                 <div id="question-image" class="mb-4 hidden">
                     <img src="" alt="Soal" class="rounded-lg max-h-64 mx-auto shadow-lg">
                 </div>
             </div>
 
             <!-- Options -->
-            <div id="options-container" class="grid gap-4">
-                <!-- Options will be generated here -->
-            </div>
+            <div id="options-container" class="grid gap-4"></div>
 
-            <!-- Explanation Box -->
-            <div id="explanation-box" class="explanation-box rounded-2xl p-6 mt-6 hidden">
-                <h4 class="font-bold text-lg mb-2 text-gray-800">💡 Penjelasan:</h4>
-                <p id="explanation-text" class="text-gray-700"></p>
+            <!-- Action Buttons (NEW!) -->
+            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                <button onclick="checkAnswer()" id="check-btn" class="action-btn bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg" disabled>
+                    ✅ Cek Jawaban
+                </button>
+                <button onclick="showKeyAnswer()" id="key-btn" class="action-btn bg-orange-500 hover:bg-orange-600 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg">
+                    🔑 Lihat Kunci Jawaban
+                </button>
             </div>
 
             <!-- Feedback -->
             <div id="feedback" class="mt-6 text-center text-xl font-bold hidden"></div>
 
+            <!-- Explanation Box -->
+            <div id="explanation-box" class="explanation-box rounded-2xl p-6 mt-6 hidden">
+                <div class="flex items-start gap-3">
+                    <div class="text-4xl">💡</div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-xl mb-2">Penjelasan:</h4>
+                        <p id="explanation-text" class="text-lg"></p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Next Button -->
             <div class="text-center mt-6">
-                <button onclick="nextQuestion()" id="next-btn" class="bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-xl font-bold hidden">
+                <button onclick="nextQuestion()" id="next-btn" class="action-btn bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-xl font-bold hidden shadow-lg">
                     Soal Berikutnya ➡️
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GROUPS SCREEN -->
+    <div id="groups-screen" class="max-w-6xl mx-auto hidden">
+        <div class="glass-effect rounded-3xl p-8 text-white">
+            <h2 class="text-3xl font-bold mb-6 text-center">👥 Manajemen Kelompok</h2>
+            
+            <div class="bg-white/20 rounded-2xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4"> Tambah Kelompok Baru</h3>
+                <div class="flex gap-3 flex-wrap">
+                    <input type="text" id="group-name" class="flex-1 p-3 rounded-lg text-gray-800 min-w-[200px]" placeholder="Nama Kelompok (misal: Kelompok 1)">
+                    <button onclick="addGroup()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold shadow-lg">
+                        ➕ Tambah
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white/20 rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-4">📋 Daftar Kelompok (<span id="group-count">0</span>)</h3>
+                <div id="group-list" class="grid md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto"></div>
             </div>
         </div>
     </div>
@@ -315,42 +325,11 @@
     <!-- LEADERBOARD SCREEN -->
     <div id="leaderboard-screen" class="max-w-4xl mx-auto hidden">
         <div class="quiz-card rounded-3xl p-8 text-white">
-            <h2 class="text-4xl font-bold mb-6 text-center">🏆 LEADERBOARD KELOMPOK</h2>
-            
-            <!-- Podium Top 3 -->
-            <div class="flex justify-center items-end gap-4 mb-8 h-64">
-                <div id="podium-2" class="podium-2 rounded-t-2xl w-32 flex flex-col items-center justify-end p-4 hidden" style="height: 160px;">
-                    <div class="text-4xl mb-2">🥈</div>
-                    <div class="font-bold text-gray-800 text-center" id="podium-2-name">-</div>
-                    <div class="text-gray-800 font-bold" id="podium-2-score">0</div>
-                </div>
-                <div id="podium-1" class="podium-1 rounded-t-2xl w-32 flex flex-col items-center justify-end p-4 hidden" style="height: 220px;">
-                    <div class="text-5xl mb-2">👑</div>
-                    <div class="font-bold text-gray-800 text-center" id="podium-1-name">-</div>
-                    <div class="text-gray-800 font-bold text-xl" id="podium-1-score">0</div>
-                </div>
-                <div id="podium-3" class="podium-3 rounded-t-2xl w-32 flex flex-col items-center justify-end p-4 hidden" style="height: 120px;">
-                    <div class="text-4xl mb-2">🥉</div>
-                    <div class="font-bold text-gray-800 text-center" id="podium-3-name">-</div>
-                    <div class="text-gray-800 font-bold" id="podium-3-score">0</div>
-                </div>
-            </div>
-            
-            <!-- Full Leaderboard -->
-            <div class="glass-effect rounded-2xl p-6 mb-6">
-                <h3 class="text-2xl font-bold mb-4">📊 Peringkat Lengkap</h3>
-                <div id="leaderboard-list" class="space-y-3">
-                    <!-- Leaderboard items will be generated here -->
-                </div>
-            </div>
-            
-            <!-- Controls -->
-            <div class="flex gap-4 justify-center flex-wrap">
-                <button onclick="showScreen('menu')" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl font-bold">
-                    🏠 Menu
-                </button>
-                <button onclick="resetLeaderboard()" class="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-xl font-bold">
-                    🔄 Reset Skor
+            <h2 class="text-4xl font-bold mb-6 text-center"> LEADERBOARD KELOMPOK</h2>
+            <div id="leaderboard-container" class="space-y-4"></div>
+            <div class="text-center mt-6">
+                <button onclick="resetLeaderboard()" class="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-xl font-bold shadow-lg">
+                    🔄 Reset Leaderboard
                 </button>
             </div>
         </div>
@@ -361,7 +340,6 @@
         <div class="glass-effect rounded-3xl p-8 text-white">
             <h2 class="text-3xl font-bold mb-6 text-center">✏️ Kelola Soal Kuis</h2>
             
-            <!-- Add/Edit Form -->
             <div class="bg-white/20 rounded-2xl p-6 mb-6">
                 <h3 class="text-xl font-bold mb-4" id="form-title">➕ Tambah Soal Baru</h3>
                 
@@ -406,27 +384,26 @@
                     </div>
                     
                     <div>
-                        <label class="block mb-2 font-semibold"> Penjelasan Jawaban Benar:</label>
-                        <textarea id="input-explanation" class="w-full p-3 rounded-lg text-gray-800" rows="3" placeholder="Jelaskan mengapa jawaban ini benar..."></textarea>
+                        <label class="block mb-2 font-semibold">💡 Penjelasan Jawaban (wajib):</label>
+                        <textarea id="input-explanation" class="w-full p-3 rounded-lg text-gray-800" rows="3" placeholder="Jelaskan kenapa jawaban ini benar..."></textarea>
                     </div>
                     
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-2 font-semibold">Bab:</label>
-                            <select id="input-bab" class="w-full p-3 rounded-lg text-gray-800">
-                                <option value="bab1">Bab 1 - Karya Berdampak</option>
-                                <option value="bab2">Bab 2 - Apresiasi Seni Rupa</option>
-                                <option value="bab3">Bab 3 - Membuat Karya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block mb-2 font-semibold">Timer (detik):</label>
-                            <input type="number" id="input-timer" class="w-full p-3 rounded-lg text-gray-800" value="10" min="5" max="60">
-                        </div>
+                    <div>
+                        <label class="block mb-2 font-semibold">Bab:</label>
+                        <select id="input-bab" class="w-full p-3 rounded-lg text-gray-800">
+                            <option value="bab1">Bab 1 - Karya Berdampak</option>
+                            <option value="bab2">Bab 2 - Apresiasi Seni Rupa</option>
+                            <option value="bab3">Bab 3 - Membuat Karya</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 font-semibold">Timer (detik):</label>
+                        <input type="number" id="input-timer" class="w-full p-3 rounded-lg text-gray-800" value="10" min="5" max="60">
                     </div>
                     
                     <div class="flex gap-4">
-                        <button onclick="saveQuestion()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold flex-1">
+                        <button onclick="saveQuestion()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold flex-1 shadow-lg">
                             💾 Simpan Soal
                         </button>
                         <button onclick="resetForm()" class="bg-gray-500 hover:bg-gray-600 px-6 py-3 rounded-lg font-bold">
@@ -436,26 +413,9 @@
                 </div>
             </div>
 
-            <!-- Timer Settings -->
-            <div class="bg-white/20 rounded-2xl p-6 mb-6">
-                <h3 class="text-xl font-bold mb-4">⏱️ Pengaturan Timer</h3>
-                <div class="flex items-center gap-4 flex-wrap">
-                    <label class="font-semibold">Timer Default:</label>
-                    <input type="number" id="default-timer" class="p-3 rounded-lg text-gray-800 w-32" value="10" min="5" max="60">
-                    <span class="font-semibold">detik</span>
-                    <label class="flex items-center gap-2 ml-4">
-                        <input type="checkbox" id="auto-start" class="w-5 h-5">
-                        <span>Auto-start timer</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Question List -->
             <div class="bg-white/20 rounded-2xl p-6">
                 <h3 class="text-xl font-bold mb-4">📋 Daftar Soal (<span id="question-count">0</span>)</h3>
-                <div id="question-list" class="space-y-3 max-h-96 overflow-y-auto">
-                    <!-- Questions will be listed here -->
-                </div>
+                <div id="question-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
             </div>
         </div>
     </div>
@@ -463,7 +423,7 @@
     <!-- RESULT SCREEN -->
     <div id="result-screen" class="max-w-4xl mx-auto hidden">
         <div class="quiz-card rounded-3xl p-8 text-white text-center">
-            <h2 class="text-4xl font-bold mb-6"> Kuis Selesai!</h2>
+            <h2 class="text-4xl font-bold mb-6">🎉 Kuis Selesai!</h2>
             
             <div class="score-display rounded-full w-48 h-48 mx-auto mb-6 flex items-center justify-center">
                 <div>
@@ -472,24 +432,30 @@
                 </div>
             </div>
             
-            <div class="text-2xl mb-6">
-                <p>👥 Kelompok: <span id="result-group" class="font-bold text-yellow-300">-</span></p>
+            <div class="text-2xl mb-6 space-y-2">
                 <p>✅ Benar: <span id="correct-count" class="font-bold text-green-300">0</span></p>
-                <p>❌ Salah: <span id="wrong-count" class="font-bold text-red-300">0</span></p>
+                <p> Salah: <span id="wrong-count" class="font-bold text-red-300">0</span></p>
+                <p>🔑 Lihat Kunci: <span id="key-count" class="font-bold text-orange-300">0</span></p>
             </div>
             
-            <div class="glass-effect rounded-2xl p-4 mb-6">
-                <p class="text-lg">🏆 Skor kelompok bertambah <span id="added-score" class="font-bold text-yellow-300">0</span> poin!</p>
+            <div id="add-to-group-section" class="bg-white/20 rounded-2xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4">➕ Tambahkan Nilai ke Kelompok</h3>
+                <select id="result-group-select" class="w-full p-3 rounded-lg text-gray-800 mb-3">
+                    <option value="">-- Pilih Kelompok --</option>
+                </select>
+                <button onclick="addScoreToGroup()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold shadow-lg w-full">
+                    💾 Tambah Nilai ke Kelompok
+                </button>
             </div>
             
             <div class="flex gap-4 justify-center flex-wrap">
-                <button onclick="showScreen('leaderboard')" class="bg-yellow-500 hover:bg-yellow-600 px-8 py-3 rounded-xl font-bold">
-                     Lihat Leaderboard
+                <button onclick="showScreen('menu')" class="bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-xl font-bold shadow-lg">
+                     Menu
                 </button>
-                <button onclick="showScreen('menu')" class="bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-xl font-bold">
-                    🏠 Menu
+                <button onclick="showScreen('leaderboard')" class="bg-yellow-500 hover:bg-yellow-600 px-8 py-3 rounded-xl font-bold shadow-lg">
+                    🏆 Leaderboard
                 </button>
-                <button onclick="showScreen('group-select')" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold">
+                <button onclick="startQuiz('all')" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold shadow-lg">
                     🔄 Main Lagi
                 </button>
             </div>
@@ -497,63 +463,189 @@
     </div>
 
     <script>
-        // Default Questions with Explanations
+        // Default Questions
         const defaultQuestions = [
-            {
-                question: "Tahap pertama dalam Design Thinking adalah...",
-                image: "",
-                options: ["Prototype", "Empathy", "Ideate", "Test"],
-                correct: 1,
-                explanation: "Empathy adalah tahap pertama Design Thinking karena kita harus memahami masalah dan kebutuhan pengguna terlebih dahulu sebelum mencari solusi. Tanpa empati, solusi yang dibuat bisa jadi tidak relevan.",
-                bab: "bab1",
-                timer: 10
-            },
-            {
-                question: "Karya seni yang memiliki fungsi praktis disebut...",
-                image: "",
-                options: ["Seni Murni", "Seni Terapan", "Seni Pertunjukan", "Seni Digital"],
-                correct: 1,
-                explanation: "Seni Terapan (Applied Art) adalah karya seni yang selain memiliki nilai estetika, juga memiliki fungsi praktis dalam kehidupan sehari-hari. Contohnya: batik untuk pakaian, keramik untuk wadah, poster untuk informasi.",
-                bab: "bab1",
-                timer: 10
-            },
-            {
-                question: "Batik termasuk jenis seni rupa...",
-                image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400",
-                options: ["2 Dimensi", "3 Dimensi", "4 Dimensi", "Tidak berdimensi"],
-                correct: 0,
-                explanation: "Batik adalah seni rupa 2 dimensi karena hanya memiliki panjang dan lebar (terdapat pada bidang datar seperti kain). Seni rupa 3 dimensi memiliki panjang, lebar, dan tinggi (seperti patung).",
-                bab: "bab2",
-                timer: 10
-            },
-            {
-                question: "Unsur seni rupa yang berupa goresan disebut...",
-                image: "",
-                options: ["Bentuk", "Warna", "Garis", "Tekstur"],
-                correct: 2,
-                explanation: "Garis adalah unsur seni rupa paling dasar yang terbentuk dari rangkaian titik-titik yang saling berhubungan. Garis bisa lurus, lengkung, zigzag, dan memiliki karakter berbeda yang memberikan kesan tertentu pada karya.",
-                bab: "bab2",
-                timer: 10
-            },
-            {
-                question: "Teknik membuat batik dengan menggunakan alat canting disebut...",
-                image: "",
-                options: ["Printing", "Batik Tulis", "Batik Cap", "Batik Lukis"],
-                correct: 1,
-                explanation: "Batik Tulis menggunakan canting (alat tradisional dari tembaga) untuk menerapkan malam (lilin) pada kain. Proses ini membutuhkan ketelitian tinggi dan waktu lama, sehingga batik tulis memiliki nilai seni dan harga lebih tinggi.",
-                bab: "bab3",
-                timer: 10
-            },
-            {
-                question: "Poster kampanye lingkungan termasuk karya seni...",
-                image: "",
-                options: ["Murni", "Terapan", "Tradisional", "Klasik"],
-                correct: 1,
-                explanation: "Poster adalah contoh Desain Komunikasi Visual (DKV) yang termasuk seni terapan karena memiliki fungsi menyampaikan pesan/informasi kepada masyarakat. Poster kampanye lingkungan bertujuan mengedukasi tentang isu lingkungan.",
-                bab: "bab1",
-                timer: 10
-            }
-        ];
+      {
+        "question": "Tahap pertama dalam Design Thinking sebelum menciptakan karya seni adalah...",
+        "image": "",
+        "options": ["Prototype", "Empathy", "Ideate", "Test"],
+        "correct": 1,
+        "explanation": "Empathy (empati) adalah tahap pertama Design Thinking. Pada tahap ini, kita mengamati dan memahami masalah di lingkungan sekitar sebelum membuat karya. Tanpa memahami masalah, karya yang dibuat tidak akan berdampak.",
+        "bab": "bab1",
+        "timer": 15
+      },
+      {
+        "question": "Poster kampanye lingkungan termasuk karya seni...",
+        "image": "",
+        "options": ["Murni", "Terapan", "Tradisional", "Klasik"],
+        "correct": 1,
+        "explanation": "Poster adalah contoh Seni Terapan karena memiliki fungsi komunikasi - menyampaikan pesan/informasi kepada masyarakat. Dalam hal ini poster kampanye lingkungan berfungsi mengedukasi masyarakat.",
+        "bab": "bab1",
+        "timer": 10
+      },
+      {
+        "question": "Perhatikan gambar poster berikut! Pesan utama poster tersebut adalah...",
+        "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400",
+        "options": ["Ajakan menanam pohon", "Ajakan hemat air", "Ajakan hemat listrik", "Ajakan daur ulang sampah"],
+        "correct": 0,
+        "explanation": "Poster dengan gambar pohon dan tangan yang menanam menunjukkan ajakan untuk menanam pohon atau menjaga lingkungan hijau. Unsur visual (gambar pohon) mendukung pesan tersebut.",
+        "bab": "bab1",
+        "timer": 20
+      },
+      {
+        "question": "Dalam menyusun bahan presentasi proses kreatif berkarya, hal yang PALING penting untuk dicantumkan adalah...",
+        "image": "",
+        "options": ["Harga bahan yang digunakan", "Tahapan proses dari ide hingga karya jadi", "Nama toko tempat beli bahan", "Jumlah waktu yang dihabiskan"],
+        "correct": 1,
+        "explanation": "Presentasi proses kreatif harus menunjukkan alur berpikir dan tahapan berkarya: dari observasi masalah, pencarian ide, sketsa, hingga karya final. Ini membantu orang lain memahami cara kita berkarya.",
+        "bab": "bab1",
+        "timer": 15
+      },
+      {
+        "question": "Urutan yang benar dalam proses Design Thinking adalah...",
+        "image": "",
+        "options": ["Ideate - Empathy - Define - Prototype - Test", "Empathy - Define - Ideate - Prototype - Test", "Test - Prototype - Ideate - Define - Empathy", "Define - Empathy - Test - Ideate - Prototype"],
+        "correct": 1,
+        "explanation": "Urutan Design Thinking: 1) Empathy (pahami masalah), 2) Define (rumuskan masalah), 3) Ideate (cari ide), 4) Prototype (buat model), 5) Test (uji coba). Urutan ini memastikan karya yang dibuat benar-benar menyelesaikan masalah.",
+        "bab": "bab1",
+        "timer": 20
+      },
+      {
+        "question": "Saat melakukan tahap 'Empathy' untuk masalah sampah di madrasah, kegiatan yang paling tepat adalah...",
+        "image": "",
+        "options": ["Langsung membuat tempat sampah", "Mengamati dan mewawancarai santri tentang kebiasaan buang sampah", "Membeli tempat sampah baru", "Membuat poster larangan buang sampah"],
+        "correct": 1,
+        "explanation": "Tahap Empathy berarti kita harus 'merasakan' masalah dari sudut pandang orang yang mengalaminya. Cara terbaik adalah observasi langsung dan wawancara untuk memahami akar masalah sebelum mencari solusi.",
+        "bab": "bab1",
+        "timer": 15
+      },
+      {
+        "question": "Perhatikan gambar sketsa berikut! Tahap Design Thinking yang sedang ditunjukkan adalah...",
+        "image": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400",
+        "options": ["Empathy", "Define", "Ideate", "Prototype"],
+        "correct": 2,
+        "explanation": "Gambar menunjukkan berbagai sketsa dan coretan ide. Ini adalah tahap Ideate (mencari ide), di mana kita menuangkan berbagai gagasan solusi tanpa menyaring terlebih dahulu. Semakin banyak ide, semakin baik.",
+        "bab": "bab1",
+        "timer": 20
+      },
+      {
+        "question": "Apresiasi seni rupa secara sederhana berarti...",
+        "image": "",
+        "options": ["Menggambar ulang karya orang lain", "Mengamati, memahami, dan menilai karya seni", "Membeli karya seni mahal", "Mengkritik karya seni dengan keras"],
+        "correct": 1,
+        "explanation": "Apresiasi berasal dari kata 'appreciate' yang berarti menghargai. Dalam seni rupa, apresiasi berarti kegiatan mengamati, memahami makna, dan menilai karya seni dengan sikap positif dan terbuka.",
+        "bab": "bab2",
+        "timer": 10
+      },
+      {
+        "question": "Berikut yang merupakan contoh karya seni rupa tradisional Indonesia adalah...",
+        "image": "",
+        "options": ["Lukisan digital", "Batik tulis", "Fotografi modern", "Animasi 3D"],
+        "correct": 1,
+        "explanation": "Batik tulis adalah warisan budaya Indonesia yang telah ada sejak ratusan tahun lalu. UNESCO bahkan mengakui batik sebagai Warisan Budaya Tak Benda. Batik dibuat dengan teknik canting dan malam (lilin).",
+        "bab": "bab2",
+        "timer": 10
+      },
+      {
+        "question": "Perhatikan gambar karya seni berikut! Karya ini termasuk jenis...",
+        "image": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400",
+        "options": ["Seni Rupa 2 Dimensi", "Seni Rupa 3 Dimensi", "Seni Pertunjukan", "Seni Musik"],
+        "correct": 1,
+        "explanation": "Gambar menunjukkan patung yang memiliki panjang, lebar, dan tinggi (volume). Ini adalah ciri Seni Rupa 3 Dimensi. Berbeda dengan lukisan yang hanya memiliki panjang dan lebar (2 dimensi).",
+        "bab": "bab2",
+        "timer": 15
+      },
+      {
+        "question": "Perbedaan utama seni rupa murni dan seni rupa terapan adalah...",
+        "image": "",
+        "options": ["Seni murni lebih mahal harganya", "Seni terapan memiliki fungsi praktis selain estetika", "Seni murni lebih sulit dibuat", "Seni terapan tidak memerlukan kreativitas"],
+        "correct": 1,
+        "explanation": "Seni Murni (fine art) dibuat untuk ekspresi dan keindahan saja, seperti lukisan di galeri. Seni Terapan (applied art) memiliki fungsi praktis, seperti kursi (untuk duduk), batik (untuk pakaian), atau poster (untuk informasi).",
+        "bab": "bab2",
+        "timer": 15
+      },
+      {
+        "question": "Unsur seni rupa yang paling dominan dalam karya kaligrafi Islam adalah...",
+        "image": "",
+        "options": ["Warna", "Garis", "Tekstur", "Ruang"],
+        "correct": 1,
+        "explanation": "Kaligrafi adalah seni menulis indah yang mengandalkan goresan garis. Garis-garis lengkung, lurus, dan tebal-tipis membentuk huruf Arab yang estetis. Meskipun ada warna, unsur utama tetap garis.",
+        "bab": "bab2",
+        "timer": 15
+      },
+      {
+        "question": "Perhatikan gambar motif berikut! Motif ini berasal dari daerah...",
+        "image": "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400",
+        "options": ["Bali", "Jawa (Batik Parang)", "Sumatera", "Kalimantan"],
+        "correct": 1,
+        "explanation": "Motif Parang adalah motif batik khas Jawa (Yogyakarta/Solo) yang berbentuk seperti huruf S berulang. Motif ini melambangkan kekuatan dan kesinambungan. Hanya keluarga keraton yang boleh memakai motif tertentu.",
+        "bab": "bab2",
+        "timer": 20
+      },
+      {
+        "question": "Tujuan utama melakukan apresiasi terhadap karya seni rupa Indonesia adalah...",
+        "image": "",
+        "options": ["Agar bisa meniru karya tersebut", "Untuk mengenal, menghargai, dan melestarikan budaya bangsa", "Supaya bisa menjual karya lebih mahal", "Agar terlihat pintar di depan teman"],
+        "correct": 1,
+        "explanation": "Apresiasi seni rupa Indonesia membantu kita mengenal kekayaan budaya, memahami nilai-nilai luhur yang terkandung, dan akhirnya terdorong untuk melestarikannya. Ini bentuk cinta tanah air melalui seni.",
+        "bab": "bab2",
+        "timer": 15
+      },
+      {
+        "question": "Membuat karya seni rupa yang dikembangkan dari hasil apresiasi berarti...",
+        "image": "",
+        "options": ["Menjiplak persis karya yang diapresiasi", "Mengambil inspirasi dari karya yang diamati lalu menciptakan karya baru", "Membeli karya seni untuk dipajang", "Mengkritik karya orang lain"],
+        "correct": 1,
+        "explanation": "Mengembangkan dari hasil apresiasi BUKAN menjiplak. Kita mengambil inspirasi (gaya, teknik, atau ide) dari karya yang kita amati, lalu menciptakan karya baru dengan sentuhan pribadi kita sendiri.",
+        "bab": "bab3",
+        "timer": 15
+      },
+      {
+        "question": "Saat mengapresiasi karya teman sekelas, sikap yang PALING tepat adalah...",
+        "image": "",
+        "options": ["Langsung mengatakan 'jelek' jika tidak suka", "Memberikan kritik yang membangun dengan sopan", "Diam saja karena takut menyinggung", "Membandingkan dengan karya seniman terkenal"],
+        "correct": 1,
+        "explanation": "Kritik yang baik bersifat konstruktif (membangun). Caranya: sebutkan dulu hal yang bagus, baru berikan saran perbaikan dengan bahasa sopan. Contoh: 'Warnanya menarik, tapi komposisinya bisa lebih seimbang.'",
+        "bab": "bab3",
+        "timer": 15
+      },
+      {
+        "question": "Perhatikan gambar teknik berkarya berikut! Teknik yang digunakan adalah...",
+        "image": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400",
+        "options": ["Teknik Arsir", "Teknik Blok", "Teknik Dusel", "Teknik Pointilis"],
+        "correct": 0,
+        "explanation": "Teknik Arsir menggunakan garis-garis sejajar atau menyilang untuk menciptakan efek gelap-terang. Semakin rapat garis, semakin gelap. Teknik ini umum digunakan dalam menggambar dengan pensil atau pena.",
+        "bab": "bab3",
+        "timer": 20
+      },
+      {
+        "question": "Dalam proses membuat karya seni rupa, sketsa dibuat sebelum karya final karena...",
+        "image": "",
+        "options": ["Agar terlihat profesional", "Untuk merencanakan komposisi dan memperbaiki ide sebelum karya jadi", "Karena sketsa lebih mudah dijual", "Supaya bisa pamer ke teman"],
+        "correct": 1,
+        "explanation": "Sketsa adalah 'draft' atau rancangan awal. Dengan membuat sketsa, kita bisa mencoba berbagai komposisi, memperbaiki proporsi, dan menyempurnakan ide sebelum menggunakan bahan final yang mungkin mahal atau sulit diubah.",
+        "bab": "bab3",
+        "timer": 15
+      },
+      {
+        "question": "Perhatikan gambar karya berikut! Berdasarkan unsur seni rupa, karya ini menonjolkan unsur...",
+        "image": "https://images.unsplash.com/photo-1549887534-1541e9326642?w=400",
+        "options": ["Garis", "Warna", "Tekstur", "Ruang"],
+        "correct": 1,
+        "explanation": "Karya tersebut menonjolkan permainan warna yang kontras dan harmonis. Warna-warna cerah dan berani menjadi unsur utama yang menarik perhatian. Seniman menggunakan warna untuk menyampaikan emosi.",
+        "bab": "bab3",
+        "timer": 20
+      },
+      {
+        "question": "Setelah membuat karya seni rupa, langkah terakhir yang penting dilakukan adalah...",
+        "image": "",
+        "options": ["Langsung membuang sketsa", "Merefleksi proses berkarya dan mempresentasikan karya", "Menyimpan karya di lemari tanpa menunjukkan ke siapa pun", "Mengklaim karya orang lain sebagai milik sendiri"],
+        "correct": 1,
+        "explanation": "Refleksi dan presentasi adalah bagian penting dari proses berkarya. Dengan merefleksi, kita belajar dari pengalaman. Dengan mempresentasikan, kita berbagi ide dan mendapat masukan untuk berkarya lebih baik di masa depan.",
+        "bab": "bab3",
+        "timer": 15
+      }
+    ];
 
         // Audio URLs
         const audioURLs = {
@@ -564,60 +656,42 @@
 
         // State
         let questions = JSON.parse(localStorage.getItem('quizQuestions')) || defaultQuestions;
-        let groupScores = JSON.parse(localStorage.getItem('groupScores')) || {
-            1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0
-        };
-        let currentGroup = 1;
-        let selectedMode = 'all';
+        let groups = JSON.parse(localStorage.getItem('quizGroups')) || [];
         let currentQuestionIndex = 0;
         let score = 0;
         let correctAnswers = 0;
         let wrongAnswers = 0;
+        let keyAnswers = 0; // NEW: track lihat kunci
         let timerInterval;
         let timeLeft = 10;
         let timerRunning = false;
         let currentQuizQuestions = [];
         let editingIndex = -1;
+        
+        // NEW STATE untuk mekanisme answering
+        let selectedAnswer = null; // Jawaban yang sedang dipilih (belum dicek)
+        let isAnswerChecked = false; // Apakah sudah di-check
+        let attempts = 0; // Jumlah percobaan
+        let questionLocked = false; // Apakah soal sudah "selesai" (benar/lihat kunci/waktu habis)
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             updateQuestionCount();
-            updateGroupScores();
+            loadQuestions();
+            loadGroups();
         });
 
         // Screen Navigation
         function showScreen(screen) {
-            ['menu', 'group-select', 'quiz', 'leaderboard', 'manage', 'result'].forEach(s => {
+            ['menu', 'quiz', 'manage', 'groups', 'leaderboard', 'result'].forEach(s => {
                 document.getElementById(`${s}-screen`).classList.add('hidden');
             });
             document.getElementById(`${screen}-screen`).classList.remove('hidden');
             
             if (screen === 'manage') loadQuestions();
+            if (screen === 'groups') loadGroups();
             if (screen === 'leaderboard') renderLeaderboard();
-            if (screen === 'group-select') updateGroupScores();
-        }
-
-        // Mode Selection
-        function selectMode(mode) {
-            selectedMode = mode;
-            showScreen('group-select');
-        }
-
-        // Group Selection
-        function selectGroup(groupNum) {
-            currentGroup = groupNum;
-            document.querySelectorAll('.group-selector').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-        }
-
-        function confirmGroup() {
-            if (!document.querySelector('.group-selector.selected')) {
-                alert('Pilih kelompok terlebih dahulu!');
-                return;
-            }
-            startQuiz(selectedMode);
+            if (screen === 'result') populateGroupSelect();
         }
 
         // Start Quiz
@@ -631,7 +705,7 @@
             }
             
             if (filtered.length === 0) {
-                alert('Tidak ada soal untuk mode ini!');
+                alert('Tidak ada soal untuk mode ini! Tambahkan soal terlebih dahulu.');
                 return;
             }
             
@@ -640,25 +714,30 @@
             score = 0;
             correctAnswers = 0;
             wrongAnswers = 0;
+            keyAnswers = 0;
             
             document.getElementById('total-quiz').textContent = currentQuizQuestions.length;
-            document.getElementById('current-group-name').textContent = `Kelompok ${currentGroup}`;
             showScreen('quiz');
             loadQuestion();
         }
 
-        // Load Question
+        // Load Question (RESET state)
         function loadQuestion() {
             if (currentQuestionIndex >= currentQuizQuestions.length) {
                 showResult();
                 return;
             }
             
+            // RESET state untuk soal baru
+            selectedAnswer = null;
+            isAnswerChecked = false;
+            attempts = 0;
+            questionLocked = false;
+            
             const q = currentQuizQuestions[currentQuestionIndex];
             document.getElementById('current-soal').textContent = currentQuestionIndex + 1;
             document.getElementById('question-text').textContent = q.question;
             
-            // Image
             const imgContainer = document.getElementById('question-image');
             if (q.image) {
                 imgContainer.classList.remove('hidden');
@@ -667,7 +746,7 @@
                 imgContainer.classList.add('hidden');
             }
             
-            // Options
+            // Render options
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
             
@@ -676,21 +755,197 @@
                 const btn = document.createElement('button');
                 btn.className = 'option-btn bg-white text-gray-800 p-4 rounded-xl font-bold text-lg text-left';
                 btn.innerHTML = `<span class="bg-blue-500 text-white px-3 py-1 rounded-lg mr-3">${labels[idx]}</span> ${opt}`;
-                btn.onclick = () => selectAnswer(idx);
+                btn.onclick = () => selectOption(idx);
+                btn.id = `option-${idx}`;
                 optionsContainer.appendChild(btn);
             });
             
-            // Reset UI
+            // Reset UI elements
             document.getElementById('feedback').classList.add('hidden');
-            document.getElementById('next-btn').classList.add('hidden');
             document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('attempt-display').classList.add('hidden');
             
-            // Timer
+            // Reset buttons
+            document.getElementById('check-btn').disabled = true;
+            document.getElementById('check-btn').textContent = '✅ Cek Jawaban';
+            document.getElementById('check-btn').classList.remove('bg-gray-400');
+            document.getElementById('check-btn').classList.add('bg-green-500');
+            
+            document.getElementById('key-btn').disabled = false;
+            document.getElementById('key-btn').textContent = '🔑 Lihat Kunci Jawaban';
+            
+            // Timer reset
             timeLeft = q.timer || 10;
             document.getElementById('timer').textContent = timeLeft;
             timerRunning = false;
-            document.getElementById('timer-btn').textContent = `▶️ Mulai Timer (${timeLeft} detik)`;
+            document.getElementById('timer-btn').textContent = '▶️ Mulai Timer';
+            document.getElementById('timer-btn').disabled = false;
             clearInterval(timerInterval);
+            updateTimerCircle();
+        }
+
+        // NEW: Select Option (bisa diganti-ganti sebelum cek)
+        function selectOption(index) {
+            if (questionLocked) return; // Tidak bisa pilih lagi jika sudah selesai
+            
+            // Jika sudah di-check dan salah, reset state check untuk percobaan baru
+            if (isAnswerChecked && selectedAnswer !== index) {
+                isAnswerChecked = false;
+                attempts++;
+                document.getElementById('attempt-num').textContent = attempts + 1;
+                document.getElementById('attempt-display').classList.remove('hidden');
+                
+                // Reset semua visual state
+                resetOptionsVisual();
+                
+                // Hide feedback & explanation
+                document.getElementById('feedback').classList.add('hidden');
+                document.getElementById('explanation-box').classList.add('hidden');
+                
+                // Enable check button again
+                document.getElementById('check-btn').disabled = false;
+                document.getElementById('key-btn').disabled = false;
+            }
+            
+            // Set selected
+            selectedAnswer = index;
+            
+            // Visual feedback: highlight pilihan
+            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                btn.classList.remove('selected');
+                if (idx === index) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            // Enable check button
+            document.getElementById('check-btn').disabled = false;
+        }
+
+        // Reset visual state options (hapus semua class state)
+        function resetOptionsVisual() {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'wrong', 'key-answer');
+            });
+        }
+
+        // NEW: Check Answer
+        function checkAnswer() {
+            if (selectedAnswer === null) {
+                alert('Pilih salah satu jawaban terlebih dahulu!');
+                return;
+            }
+            
+            if (questionLocked) return;
+            
+            const q = currentQuizQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option-btn');
+            
+            if (selectedAnswer === q.correct) {
+                // BENAR!
+                questionLocked = true;
+                isAnswerChecked = true;
+                
+                options[selectedAnswer].classList.add('correct');
+                
+                // Hitung poin berdasarkan percobaan
+                let points = 10;
+                if (attempts === 1) points = 10; // Percobaan pertama
+                else if (attempts === 2) points = 7; // Percobaan kedua
+                else points = 5; // Percobaan ketiga dan seterusnya
+                
+                score += points;
+                correctAnswers++;
+                document.getElementById('score').textContent = score;
+                
+                document.getElementById('feedback').textContent = `✅ Benar! Hebat! +${points} poin`;
+                document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-green-300';
+                document.getElementById('feedback').classList.remove('hidden');
+                
+                showExplanation(q);
+                
+                // Disable semua tombol aksi
+                disableActionButtons();
+                
+                // Tampilkan next button
+                document.getElementById('next-btn').classList.remove('hidden');
+                
+                playAudio('correct');
+                createConfetti();
+                
+            } else {
+                // SALAH - bisa coba lagi!
+                attempts++;
+                document.getElementById('attempt-num').textContent = attempts + 1;
+                document.getElementById('attempt-display').classList.remove('hidden');
+                
+                // Tandai pilihan yang salah
+                options[selectedAnswer].classList.add('wrong');
+                
+                document.getElementById('feedback').textContent = `❌ Salah! Coba pilih jawaban lain. (Percobaan ke-${attempts + 1})`;
+                document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-yellow-300';
+                document.getElementById('feedback').classList.remove('hidden');
+                
+                // Reset selected agar bisa pilih lagi
+                selectedAnswer = null;
+                isAnswerChecked = false;
+                
+                // Disable check button sampai pilih lagi
+                document.getElementById('check-btn').disabled = true;
+                
+                // Hapus highlight selected dari opsi yang salah
+                options[selectedAnswer === null ? -1 : selectedAnswer]?.classList.remove('selected');
+                
+                playAudio('wrong');
+            }
+        }
+
+        // NEW: Show Key Answer (menyerah / ingin tahu)
+        function showKeyAnswer() {
+            if (questionLocked) return;
+            
+            const q = currentQuizQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option-btn');
+            
+            // Tandai sebagai "lihat kunci"
+            questionLocked = true;
+            keyAnswers++;
+            
+            // Highlight jawaban benar dengan warna emas
+            options[q.correct].classList.add('key-answer');
+            
+            // Jika ada pilihan yang sudah di-select dan salah, tandai juga
+            if (selectedAnswer !== null && selectedAnswer !== q.correct) {
+                options[selectedAnswer].classList.add('wrong');
+            }
+            
+            document.getElementById('feedback').textContent = '🔑 Kunci Jawaban Ditampilkan (0 poin)';
+            document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-orange-300';
+            document.getElementById('feedback').classList.remove('hidden');
+            
+            showExplanation(q);
+            
+            disableActionButtons();
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // Disable action buttons
+        function disableActionButtons() {
+            document.getElementById('check-btn').disabled = true;
+            document.getElementById('check-btn').textContent = '✅ Selesai';
+            document.getElementById('check-btn').classList.remove('bg-green-500');
+            document.getElementById('check-btn').classList.add('bg-gray-400');
+            
+            document.getElementById('key-btn').disabled = true;
+            document.getElementById('key-btn').textContent = '🔑 Selesai';
+            
+            document.getElementById('timer-btn').disabled = true;
+            
+            // Disable semua options
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
         }
 
         // Timer Control
@@ -701,19 +956,11 @@
                 document.getElementById('timer-btn').textContent = '▶️ Lanjutkan Timer';
             } else {
                 timerRunning = true;
-                document.getElementById('timer-btn').textContent = '️ Pause Timer';
+                document.getElementById('timer-btn').textContent = '⏸️ Pause Timer';
                 timerInterval = setInterval(() => {
                     timeLeft--;
                     document.getElementById('timer').textContent = timeLeft;
-                    
-                    const percentage = (timeLeft / (currentQuizQuestions[currentQuestionIndex].timer || 10)) * 360;
-                    document.getElementById('timer-circle').style.background = 
-                        `conic-gradient(#ff6b6b ${percentage}deg, #4ecdc4 ${percentage}deg)`;
-                    
-                    if (timeLeft <= 3) {
-                        document.getElementById('timer-circle').style.background = 
-                            `conic-gradient(#ff0000 ${percentage}deg, #ff6b6b ${percentage}deg)`;
-                    }
+                    updateTimerCircle();
                     
                     if (timeLeft <= 0) {
                         clearInterval(timerInterval);
@@ -723,70 +970,49 @@
             }
         }
 
+        function updateTimerCircle() {
+            const maxTime = currentQuizQuestions[currentQuestionIndex]?.timer || 10;
+            const percentage = (timeLeft / maxTime) * 360;
+            const color = timeLeft <= 3 ? '#ff0000' : (timeLeft <= 6 ? '#ffa500' : '#4ecdc4');
+            document.getElementById('timer-circle').style.background = 
+                `conic-gradient(${color} ${percentage}deg, #e0e0e0 ${percentage}deg)`;
+        }
+
         // Time Up
         function timeUp() {
+            if (questionLocked) return;
+            
             timerRunning = false;
-            document.getElementById('timer-btn').textContent = '⏰ Waktu Habis!';
+            questionLocked = true;
             
             const q = currentQuizQuestions[currentQuestionIndex];
             const options = document.querySelectorAll('.option-btn');
-            options[q.correct].classList.add('correct');
             
-            // Show explanation
-            showExplanation(q.explanation);
+            // Tandai jawaban yang dipilih (jika ada) sebagai salah
+            if (selectedAnswer !== null) {
+                options[selectedAnswer].classList.add('wrong');
+            }
             
-            playAudio('wrong');
-            
-            document.getElementById('feedback').textContent = '⏰ Waktu Habis! Jawaban yang benar ditandai hijau.';
-            document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-red-300';
-            document.getElementById('feedback').classList.remove('hidden');
-            document.getElementById('next-btn').classList.remove('hidden');
+            // Tampilkan kunci jawaban
+            options[q.correct].classList.add('key-answer');
             
             wrongAnswers++;
-            options.forEach(btn => btn.disabled = true);
+            
+            document.getElementById('feedback').textContent = '⏰ Waktu Habis! Jawaban yang benar ditandai kuning.';
+            document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-yellow-300';
+            document.getElementById('feedback').classList.remove('hidden');
+            
+            showExplanation(q);
+            disableActionButtons();
+            document.getElementById('next-btn').classList.remove('hidden');
+            
+            playAudio('wrong');
         }
 
         // Show Explanation
-        function showExplanation(text) {
-            if (text) {
-                document.getElementById('explanation-text').textContent = text;
-                document.getElementById('explanation-box').classList.remove('hidden');
-            }
-        }
-
-        // Select Answer
-        function selectAnswer(index) {
-            if (timerRunning) {
-                clearInterval(timerInterval);
-                timerRunning = false;
-            }
-            
-            const q = currentQuizQuestions[currentQuestionIndex];
-            const options = document.querySelectorAll('.option-btn');
-            
-            options.forEach(btn => btn.disabled = true);
-            
-            if (index === q.correct) {
-                options[index].classList.add('correct');
-                score += 10;
-                correctAnswers++;
-                document.getElementById('score').textContent = score;
-                document.getElementById('feedback').textContent = '✅ Benar! Hebat!';
-                document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-green-300';
-                playAudio('correct');
-                createConfetti();
-            } else {
-                options[index].classList.add('wrong');
-                options[q.correct].classList.add('correct');
-                wrongAnswers++;
-                document.getElementById('feedback').textContent = '❌ Salah! Jawaban yang benar ditandai hijau.';
-                document.getElementById('feedback').className = 'mt-6 text-center text-xl font-bold text-red-300';
-                playAudio('wrong');
-            }
-            
-            showExplanation(q.explanation);
-            document.getElementById('feedback').classList.remove('hidden');
-            document.getElementById('next-btn').classList.remove('hidden');
+        function showExplanation(q) {
+            document.getElementById('explanation-text').textContent = q.explanation || 'Tidak ada penjelasan untuk soal ini.';
+            document.getElementById('explanation-box').classList.remove('hidden');
         }
 
         // Next Question
@@ -797,97 +1023,55 @@
 
         // Show Result
         function showResult() {
-            // Add score to group
-            groupScores[currentGroup] += score;
-            localStorage.setItem('groupScores', JSON.stringify(groupScores));
-            
             showScreen('result');
             document.getElementById('final-score').textContent = score;
             document.getElementById('correct-count').textContent = correctAnswers;
             document.getElementById('wrong-count').textContent = wrongAnswers;
-            document.getElementById('result-group').textContent = `Kelompok ${currentGroup}`;
-            document.getElementById('added-score').textContent = score;
-            
+            document.getElementById('key-count').textContent = keyAnswers;
             playAudio('correct');
             createConfetti();
         }
 
-        // Render Leaderboard
-        function renderLeaderboard() {
-            const sorted = Object.entries(groupScores)
-                .sort((a, b) => b[1] - a[1])
-                .map(([group, score]) => ({ group: parseInt(group), score }));
-            
-            // Podium
-            const podiumData = [
-                { id: 1, data: sorted[0] },
-                { id: 2, data: sorted[1] },
-                { id: 3, data: sorted[2] }
-            ];
-            
-            podiumData.forEach(({ id, data }) => {
-                const podium = document.getElementById(`podium-${id}`);
-                if (data) {
-                    podium.classList.remove('hidden');
-                    document.getElementById(`podium-${id}-name`).textContent = `Kelompok ${data.group}`;
-                    document.getElementById(`podium-${id}-score`).textContent = `${data.score} poin`;
-                } else {
-                    podium.classList.add('hidden');
-                }
-            });
-            
-            // Full list
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '';
-            
-            sorted.forEach((item, idx) => {
-                const medals = ['', '🥈', '🥉'];
-                const medal = idx < 3 ? medals[idx] : `#${idx + 1}`;
-                
-                const div = document.createElement('div');
-                div.className = 'leaderboard-item glass-effect rounded-xl p-4 flex justify-between items-center';
-                div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="text-3xl">${medal}</div>
-                        <div>
-                            <div class="font-bold text-xl">Kelompok ${item.group}</div>
-                            <div class="text-sm opacity-75">Total Skor</div>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-black">${item.score}</div>
-                `;
-                list.appendChild(div);
+        // Populate Group Select in Result
+        function populateGroupSelect() {
+            const select = document.getElementById('result-group-select');
+            select.innerHTML = '<option value="">-- Pilih Kelompok --</option>';
+            groups.forEach((g, idx) => {
+                select.innerHTML += `<option value="${idx}">${g.name} (Skor saat ini: ${g.score})</option>`;
             });
         }
 
-        // Reset Leaderboard
-        function resetLeaderboard() {
-            if (confirm('Yakin ingin mereset semua skor kelompok?')) {
-                groupScores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-                localStorage.setItem('groupScores', JSON.stringify(groupScores));
-                renderLeaderboard();
-                updateGroupScores();
+        // Add Score to Group
+        function addScoreToGroup() {
+            const groupIdx = document.getElementById('result-group-select').value;
+            if (groupIdx === '') {
+                alert('Pilih kelompok terlebih dahulu!');
+                return;
             }
-        }
-
-        // Update Group Scores Display
-        function updateGroupScores() {
-            document.querySelectorAll('.group-score').forEach(el => {
-                const group = el.dataset.group;
-                el.textContent = groupScores[group] || 0;
+            
+            groups[groupIdx].score += score;
+            groups[groupIdx].history.push({
+                date: new Date().toLocaleString('id-ID'),
+                score: score,
+                correct: correctAnswers,
+                wrong: wrongAnswers,
+                key: keyAnswers
             });
+            
+            localStorage.setItem('quizGroups', JSON.stringify(groups));
+            alert(`✅ Nilai ${score} berhasil ditambahkan ke ${groups[groupIdx].name}!\nTotal skor: ${groups[groupIdx].score}`);
         }
 
         // Play Audio
         function playAudio(type) {
             const audio = new Audio(audioURLs[type]);
             audio.volume = 0.5;
-            audio.play().catch(e => console.log('Audio play failed:', e));
+            audio.play().catch(e => console.log('Audio:', e));
         }
 
-        // Confetti Effect
+        // Confetti
         function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#FFD700'];
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
@@ -899,7 +1083,196 @@
             }
         }
 
-        // Manage Questions
+        // ============ GROUP MANAGEMENT ============
+        
+        function addGroup() {
+            const name = document.getElementById('group-name').value.trim();
+            if (!name) {
+                alert('Masukkan nama kelompok!');
+                return;
+            }
+            
+            if (groups.some(g => g.name.toLowerCase() === name.toLowerCase())) {
+                alert('Nama kelompok sudah ada!');
+                return;
+            }
+            
+            groups.push({
+                name: name,
+                score: 0,
+                history: [],
+                createdAt: new Date().toLocaleString('id-ID')
+            });
+            
+            localStorage.setItem('quizGroups', JSON.stringify(groups));
+            document.getElementById('group-name').value = '';
+            loadGroups();
+            alert(`✅ Kelompok "${name}" berhasil ditambahkan!`);
+        }
+
+        function loadGroups() {
+            const list = document.getElementById('group-list');
+            list.innerHTML = '';
+            
+            if (groups.length === 0) {
+                list.innerHTML = '<p class="text-center opacity-75 col-span-2">Belum ada kelompok. Tambahkan kelompok baru!</p>';
+            }
+            
+            groups.forEach((g, idx) => {
+                const card = document.createElement('div');
+                card.className = 'group-card bg-white/20 rounded-xl p-4';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-bold text-lg">${g.name}</h4>
+                            <p class="text-sm opacity-75">Dibuat: ${g.createdAt}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-black">⭐ ${g.score}</div>
+                            <div class="text-xs opacity-75">Total Skor</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/10 rounded-lg p-3 mb-3">
+                        <p class="text-xs font-bold mb-2"> Riwayat Nilai:</p>
+                        ${g.history.length === 0 ? 
+                            '<p class="text-xs opacity-75">Belum ada riwayat</p>' :
+                            g.history.slice(-3).map(h => `
+                                <div class="text-xs mb-1">
+                                    <span class="opacity-75">${h.date.split(',')[1] || h.date}</span>
+                                    <span class="font-bold">+${h.score}</span>
+                                    <span class="opacity-75">(${h.correct}✓ ${h.wrong}✗ ${h.key}🔑)</span>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="addManualScore(${idx})" class="bg-green-500 hover:bg-green-600 px-3 py-2 rounded text-sm font-bold flex-1">
+                            ➕ Tambah Nilai
+                        </button>
+                        <button onclick="deleteGroup(${idx})" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-sm font-bold">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            
+            document.getElementById('group-count').textContent = groups.length;
+        }
+
+        function addManualScore(idx) {
+            const score = prompt(`Tambahkan nilai manual untuk ${groups[idx].name}:\n(Skor saat ini: ${groups[idx].score})`);
+            
+            if (score === null) return;
+            
+            const numScore = parseInt(score);
+            if (isNaN(numScore)) {
+                alert('Masukkan angka yang valid!');
+                return;
+            }
+            
+            groups[idx].score += numScore;
+            groups[idx].history.push({
+                date: new Date().toLocaleString('id-ID') + ' (Manual)',
+                score: numScore,
+                correct: '-',
+                wrong: '-',
+                key: '-'
+            });
+            
+            localStorage.setItem('quizGroups', JSON.stringify(groups));
+            loadGroups();
+            alert(`✅ Nilai ${numScore} ditambahkan ke ${groups[idx].name}!\nTotal baru: ${groups[idx].score}`);
+        }
+
+        function deleteGroup(idx) {
+            if (confirm(`Yakin ingin menghapus kelompok "${groups[idx].name}"?`)) {
+                groups.splice(idx, 1);
+                localStorage.setItem('quizGroups', JSON.stringify(groups));
+                loadGroups();
+            }
+        }
+
+        // ============ LEADERBOARD ============
+        
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            container.innerHTML = '';
+            
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 opacity-75">
+                        <div class="text-6xl mb-4">🏆</div>
+                        <p class="text-xl">Belum ada kelompok</p>
+                        <button onclick="showScreen('groups')" class="mt-4 bg-purple-500 px-6 py-3 rounded-xl font-bold">
+                            Tambah Kelompok
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const sorted = [...groups]
+                .map((g, idx) => ({...g, originalIdx: idx}))
+                .sort((a, b) => b.score - a.score);
+            
+            const medals = ['🥇', '🥈', '🥉'];
+            const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
+            
+            sorted.forEach((g, idx) => {
+                const isTop3 = idx < 3;
+                const item = document.createElement('div');
+                item.className = `leaderboard-item rounded-2xl p-6 ${isTop3 ? rankClasses[idx] + ' text-white' : 'bg-white/20 text-white'}`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="medal">${medals[idx] || (idx + 1)}</div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold">${g.name}</h3>
+                            <p class="text-sm opacity-75">Total ${g.history.length} sesi bermain</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-4xl font-black">⭐ ${g.score}</div>
+                            <div class="text-sm opacity-75">poin</div>
+                        </div>
+                    </div>
+                    
+                    ${g.history.length > 0 ? `
+                    <div class="mt-4 pt-4 border-t border-white/30">
+                        <p class="text-xs font-bold mb-2">📈 3 Sesi Terakhir:</p>
+                        <div class="flex gap-2 flex-wrap">
+                            ${g.history.slice(-3).map(h => `
+                                <span class="bg-white/20 px-3 py-1 rounded-full text-xs">
+                                    +${h.score} (${h.correct}✓)
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function resetLeaderboard() {
+            if (confirm('⚠️ Yakin ingin mereset SEMUA skor kelompok?')) {
+                if (confirm('Konfirmasi sekali lagi: Reset semua skor?')) {
+                    groups.forEach(g => {
+                        g.score = 0;
+                        g.history = [];
+                    });
+                    localStorage.setItem('quizGroups', JSON.stringify(groups));
+                    renderLeaderboard();
+                    alert('✅ Leaderboard berhasil direset!');
+                }
+            }
+        }
+
+        // ============ QUESTION MANAGEMENT ============
+        
         function loadQuestions() {
             const list = document.getElementById('question-list');
             list.innerHTML = '';
@@ -908,18 +1281,20 @@
                 const item = document.createElement('div');
                 item.className = 'bg-white/10 rounded-lg p-4';
                 item.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
+                    <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <div class="font-bold">${idx + 1}. ${q.question.substring(0, 60)}${q.question.length > 60 ? '...' : ''}</div>
+                            <div class="font-bold">${idx + 1}. ${q.question.substring(0, 60)}...</div>
                             <div class="text-sm opacity-75 mt-1">
-                                <span class="bg-blue-500 px-2 py-1 rounded text-xs">Bab: ${q.bab}</span>
-                                <span class="bg-yellow-500 px-2 py-1 rounded text-xs ml-1">Timer: ${q.timer}s</span>
+                                <span class="bg-blue-500/30 px-2 py-1 rounded">Bab: ${q.bab}</span>
+                                <span class="bg-yellow-500/30 px-2 py-1 rounded ml-2">Timer: ${q.timer}s</span>
                             </div>
-                            ${q.explanation ? `<div class="text-xs mt-2 italic opacity-90">💡 ${q.explanation.substring(0, 80)}...</div>` : ''}
+                            <div class="text-xs opacity-75 mt-2 italic">
+                                💡 ${q.explanation ? q.explanation.substring(0, 80) + '...' : 'Tidak ada penjelasan'}
+                            </div>
                         </div>
-                        <div class="flex gap-2 ml-2">
-                            <button onclick="editQuestion(${idx})" class="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm">✏️</button>
-                            <button onclick="deleteQuestion(${idx})" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm">️</button>
+                        <div class="flex gap-2 ml-3">
+                            <button onclick="editQuestion(${idx})" class="bg-yellow-500 px-3 py-1 rounded text-sm hover:bg-yellow-600">✏️</button>
+                            <button onclick="deleteQuestion(${idx})" class="bg-red-500 px-3 py-1 rounded text-sm hover:bg-red-600">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -950,9 +1325,8 @@
             }
             
             if (!explanation) {
-                if (!confirm('Penjelasan kosong. Yakin ingin menyimpan tanpa penjelasan?')) {
-                    return;
-                }
+                alert('Mohon isi penjelasan jawaban!');
+                return;
             }
             
             const newQuestion = { question, image, options, correct, explanation, bab, timer };
@@ -960,7 +1334,7 @@
             if (editingIndex >= 0) {
                 questions[editingIndex] = newQuestion;
                 editingIndex = -1;
-                document.getElementById('form-title').textContent = '➕ Tambah Soal Baru';
+                document.getElementById('form-title').textContent = ' Tambah Soal Baru';
             } else {
                 questions.push(newQuestion);
             }
@@ -985,7 +1359,7 @@
             document.getElementById('input-timer').value = q.timer;
             
             editingIndex = index;
-            document.getElementById('form-title').textContent = '✏️ Edit Soal';
+            document.getElementById('form-title').textContent = '️ Edit Soal';
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
